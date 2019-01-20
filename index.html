@@ -14,5 +14,24 @@
   </div>
   <ul id="ships">
   </ul>
+	<div class="ui inverted segment">
+	  <form class="ui inverted form" id="new-ship-form" name="ship">
+	    <div class="three fields">
+	      <div class="field">
+	        <label>Name</label>
+	        <input placeholder="Ship Name" type="text" name="ship[name]">
+	      </div>
+	      <div class="field">
+	        <label>Color</label>
+	        <input placeholder="Color" type="text" name="ship[color]">
+	      </div>
+				<div class="field">
+	        <label>Health</label>
+	        <input placeholder="Starting Health" type="text" name="ship[health]">
+	      </div>
+		</div>
+	    <input class="ui submit button" type= "submit">
+	  </form>
+	</div>
 </body>
 </html>

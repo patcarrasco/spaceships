@@ -1,4 +1,12 @@
-const URL = "http://localhost:3000"
+// const PROXYURL = 'https://cors-anywhere.herokuapp.com/'
+const URL = 'http://localhost:3000/ships';
+const API_WEBSOCK_ROOT = 'ws://localhost:3000/cable';
+const HEADERS = {
+  'Content-Type': 'application/json',
+  Accept: 'application/json',
+};
+
+
 document.addEventListener("DOMContentLoaded", () => {
   let canvas = document.createElement("canvas");
   let node = document.getElementById("ships")
@@ -9,9 +17,9 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.width = 400;
   canvas.height = 400;
 
-  fetch(`${URL}/ships`)
-  .then(res => res.json())
-  .then(ships => ships.forEach(ship => render(node, ship)))
+  // fetch(URL, {mode: 'no-cors'})
+  //   .then(res => res.json())
+  //   .then(ships => ships.forEach(ship => render(node, ship)))
 
 function render(node, ship) {
   let li = document.createElement("li")
@@ -55,4 +63,23 @@ function checkKey(e) {
   }
 
   b.append(canvas);
+
+  const shipForm = document.getElementById('new-ship-form')
+  shipForm.addEventListener('submit', createShip)
+
+
+  function createShip(e) {
+    console.log(e.target)
+    e.preventDefault()
+    fetch(URL, {
+      method: 'POST',
+      headers: HEADERS,
+      mode: 'no-cors'
+    })
+    .then(res => res.json())
+    .then(console.log("success"))
+    .then(window.matchSocket = new WebSocket(API_WEBSOCK_ROOT))
+    .catch(() => console.log("can't access " + URL))
+  }
+
 })
