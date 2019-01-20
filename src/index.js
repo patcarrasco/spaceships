@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let ctx = canvas.getContext("2d");
   let sx = 0
   let sy = 0
+  canvas.className = "ui center aligned"
   canvas.width = 400;
   canvas.height = 400;
 
@@ -41,7 +42,5 @@ function checkKey(e) {
     }
   }
 
-  document.body.appendChild(canvas);
-
-
+  b.append(canvas);
 })
