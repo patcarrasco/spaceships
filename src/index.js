@@ -1,11 +1,23 @@
+const URL = "http://localhost:3000"
 document.addEventListener("DOMContentLoaded", () => {
   let canvas = document.createElement("canvas");
+  let node = document.getElementById("ships")
   let ctx = canvas.getContext("2d");
   let sx = 0
   let sy = 0
   canvas.className = "ui center aligned"
   canvas.width = 400;
   canvas.height = 400;
+
+  fetch(`${URL}/ships`)
+  .then(res => res.json())
+  .then(ships => ships.forEach(ship => render(node, ship)))
+
+function render(node, ship) {
+  let li = document.createElement("li")
+  li.innerText = ship.name
+  node.append(li)
+}
 
 document.onkeydown = checkKey;
 
