@@ -1,4 +1,3 @@
-// const PROXYURL = 'https://cors-anywhere.herokuapp.com/'
 const URL = 'http://localhost:3000/ships';
 const API_WEBSOCK_ROOT = 'ws://localhost:3000/cable';
 const HEADERS = {
@@ -96,13 +95,9 @@ function checkKey(e) {
   }
 
   function connect() {
-      alert('connected');
         ws = new WebSocket(API_WEBSOCK_ROOT, []);
-        // Set the function to be called when a message is received.
-        ws.onmessage = () => console.log('message recieved')
-        // Set the function to be called when we have connected to the server.
-        ws.onopen = () => console.log('connected')
-        // Set the function to be called when an error occurs.
+        ws.onmessage = () => console.log('message recieved') // ping every 3 seconds
+        ws.onopen = () => console.log('handshake successful')
         ws.onerror = () => console.log('ERROR!!')
     }
 
