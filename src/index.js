@@ -13,9 +13,12 @@ document.addEventListener("DOMContentLoaded", () => {
   let ctx = canvas.getContext("2d");
   let sx = 0
   let sy = 0
+
+  const canvHold = document.getElementById('canvas-div')
+
   canvas.className = "ui center aligned"
-  canvas.width = 400;
-  canvas.height = 400;
+  canvas.width = canvHold.offsetWidth
+  canvas.height = 500
 
   // fetch(URL, {mode: 'no-cors'})
   //   .then(res => res.json())
