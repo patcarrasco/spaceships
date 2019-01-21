@@ -17,12 +17,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const canvHold = document.getElementById('canvas-div')
 
   canvas.className = "ui center aligned"
-  canvas.width = canvHold.offsetWidth
-  canvas.height = 500
+  canvas.width =  400  //canvHold.offsetWidth
+  canvas.height = 400
 
-  // fetch(URL, {mode: 'no-cors'})
-  //   .then(res => res.json())
-  //   .then(ships => ships.forEach(ship => render(node, ship)))
+  fetch(URL)
+    .then(res => res.json())
+    .then(ships => ships.forEach(ship => render(node, ship)))
 
 function render(node, ship) {
   let li = document.createElement("li")
@@ -88,9 +88,22 @@ function checkKey(e) {
       body: JSON.stringify(obj)
     })
     .then(res => res.json())
-    .then(console.log)
-    .then(window.matchSocket = new WebSocket(API_WEBSOCK_ROOT))
-    .catch(() => console.log("can't access " + URL))
+    .then( (ship) => {
+      connect()
+      render(node, ship)
+    })
+    .catch((errors) => console.log("error: ", errors))
   }
+
+  function connect() {
+      alert('connected');
+        ws = new WebSocket(API_WEBSOCK_ROOT, []);
+        // Set the function to be called when a message is received.
+        ws.onmessage = () => console.log('message recieved')
+        // Set the function to be called when we have connected to the server.
+        ws.onopen = () => console.log('connected')
+        // Set the function to be called when an error occurs.
+        ws.onerror = () => console.log('ERROR!!')
+    }
 
 })
