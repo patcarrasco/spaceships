@@ -69,15 +69,25 @@ function checkKey(e) {
 
 
   function createShip(e) {
-    console.log(e.target)
+    let name = document.getElementById('input-name')
+    let color = document.getElementById('input-color')
+    let health = document.getElementById('input-health')
+
     e.preventDefault()
+
+    let obj = {ship : {
+      name: name.value,
+      color: color.value,
+      health: health.value
+    }}
+
     fetch(URL, {
       method: 'POST',
       headers: HEADERS,
-      mode: 'no-cors'
+      body: JSON.stringify(obj)
     })
     .then(res => res.json())
-    .then(console.log("success"))
+    .then(console.log)
     .then(window.matchSocket = new WebSocket(API_WEBSOCK_ROOT))
     .catch(() => console.log("can't access " + URL))
   }
