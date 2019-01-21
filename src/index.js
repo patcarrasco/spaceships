@@ -71,14 +71,12 @@ function checkKey(e) {
   function createShip(e) {
     let name = document.getElementById('input-name')
     let color = document.getElementById('input-color')
-    let health = document.getElementById('input-health')
 
     e.preventDefault()
 
     let obj = {ship : {
       name: name.value,
       color: color.value,
-      health: health.value
     }}
 
     fetch(URL, {
