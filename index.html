@@ -10,10 +10,25 @@
 </head>
 <body>
   <h1 class="ui center aligned header">SpaceShips.io</h1>
-  <div class="ui grid">
+  <div class="ui grid" id='canvas-div'>
   	<div id="b" class="ui column center aligned"></div>
   </div>
   <ul id="ships">
   </ul>
+	<div class="ui inverted segment">
+	  <form class="ui inverted form" id="new-ship-form">
+	    <div class="two fields">
+	      <div class="field">
+	        <label>Name</label>
+	        <input placeholder="Ship Name" type="text" id="input-name">
+	      </div>
+	      <div class="field">
+	        <label>Color</label>
+	        <input placeholder="Color" type="text" id ="input-color">
+	      </div>
+		</div>
+	    <input class="ui submit button" type= "submit">
+	  </form>
+	</div>
 </body>
 </html>
