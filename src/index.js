@@ -38,17 +38,4 @@ document.addEventListener("DOMContentLoaded", () => {
     })
     .catch((errors) => console.log("error: ", errors))
   }
-
-  function connect() {
-    let ws = new WebSocket(API_WEBSOCK_ROOT)
-    console.log(ws)
-    ws.onopen = () => {
-      ws.send('MatchChannel', {
-        method: "subscribed"
-        params: {
-          channel: ""
-        }
-      })
-    }
-  }
 })

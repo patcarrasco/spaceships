@@ -1,18 +1,11 @@
 let config = {
   type: Phaser.AUTO, // phaser auto decides how to render
-  width: 1000, // width
-  height:600, // height
+  width: 800, // width
+  height: 600, // height
   physics: {
     default: 'arcade',
     arcade: {
-      gravity: {x:0, y:0},
-      setBounds: {
-        x: 0,
-        y: 0,
-        width: 5000,
-        height: 5000,
-        thickness: 32
-      }
+      gravity: {x:0, y:0}
     }
   },
   scene: [
