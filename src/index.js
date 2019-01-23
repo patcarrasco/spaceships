@@ -39,9 +39,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function connect() {
         ws = new WebSocket(API_WEBSOCK_ROOT, []);
-        ws.onmessage = () => console.log('message recieved') // ping every 3 seconds
-        ws.onopen = () => console.log('handshake successful')
-        ws.onerror = () => console.log('ERROR!!')
+        ws.onmessage = (e) => console.log(e) // ping every 3 seconds
+        ws.onopen = () => console.log("Connection Opened")
+        ws.onerror = (e) => console.log(`error: ${e}`)
     }
 
 })

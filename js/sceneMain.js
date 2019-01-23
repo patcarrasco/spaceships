@@ -1,36 +1,61 @@
 class SceneMain extends Phaser.Scene {
     constructor() {
       super({key: "SceneMain"})
+      this.bulletTimer = 0
     }
 
 
     preload(){
       // load spaceship
       this.load.image('ship', 'assets/spaceship.svg')
+      // load space
       this.load.image('smallStar', 'assets/smallstar.png');
       this.load.image('sun', 'assets/sun.png');
       this.load.image('smallestStar', 'assets/smallestStar.png');
       this.load.image('moon', 'assets/moons.png');
       this.load.image('shot', 'assets/shot.png')
+      // load bullets
+      this.load.image('bullet', 'assets/bullet.png');
+
+    }
+
+    random(max) {
+      return Math.floor(Math.random() * Math.floor(max));
     }
 
     create(){
-      this.player = this.physics.add.sprite(this.sys.game.config.width * 0.5, this.sys.game.config.height * 0.5, 'ship')
+      //create walls
+      this.platforms = this.physics.add.staticGroup();
+      this.platforms.create(600, 400);
+      // create player
+      this.player = this.physics.add.sprite(this.random(5000), this.random(5000), 'ship')
       this.player.setScale(0.1)
+      this.player.alive = true
+      this.player.health = 1000
 
+      // create bullets
       this.bullets = this.physics.add.group({
         defaultKey: 'bullet',
-        maxSize:10
+        maxSize:100
       })
+      this.rect = new Phaser.Geom.Rectangle(0, 0, 5000, 5000);
 
+
+      //this.player.body.collideWorldBounds=true;
       // this.player.onWorldBounds = true
 
+
       this.player.fixedToCamera = true
+      this.cameras.main.setViewport(0, 0, 800, 600)
       this.cameras.main.setBounds(0, 0, 5000, 5000).setName('main');
       this.cameras.main.startFollow(this.player);
    // make the camera follow the player
 
 
+      /*this.physics.add.overlap(this.player, this.bullets, () => {
+        this.player.setVisible(false).setActive(false)
+        this.bullets.clear(true)
+      })*/
 
 
 
@@ -38,11 +63,11 @@ class SceneMain extends Phaser.Scene {
       // // ship movement with keys
       this.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W)
       this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A)
-      // this.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S)
+      this.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S)
       this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
       //
       this.keyUp = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP)
-      // this.keyDown = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN)
+      this.keyDown = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN)
       this.keyLeft = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT)
       this.keyRight = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT)
 
@@ -60,6 +85,7 @@ class SceneMain extends Phaser.Scene {
     }
 
     update(){
+
       // WSAD
       // if (this.keyW.isDown || this.keyUp.isDown) {
       //   this.player.body.velocity.y = -this.moveSpeed
@@ -84,10 +110,10 @@ class SceneMain extends Phaser.Scene {
         // this.player.body.acceleration.y = -this.moveSpeed
         this.move(this.player,10)
       }
-      // else if (this.keyS.isDown || this.keyDown.isDown) {
-      //   // this.player.body.acceleration.y = this.moveSpeed
-      //   this.move(this.player,-10)
-      // }
+      else if (this.keyS.isDown || this.keyDown.isDown) {
+        // this.player.body.acceleration.y = this.moveSpeed
+        this.move(this.player,-5)
+      }
       else {
         this.player.body.acceleration.y = 0
       }
@@ -102,8 +128,22 @@ class SceneMain extends Phaser.Scene {
         this.player.angle += 0
       }
 
-      var bullet = this.bullets.get(this.player.x, this.player.y);
-
+      if(this.keySpace.isDown) {
+        if (this.time.now > this.bulletTimer) {
+          let bulletSpeed = 200
+          let bulletSpacing = 250
+          let bullet = this.bullets.get()
+          if(bullet) {
+            bullet.x = this.player.x
+            bullet.y = this.player.y
+            bullet.setActive(true);
+            bullet.setVisible(true);
+            bullet.angle = this.player.angle;
+            this.physics.velocityFromAngle(bullet.angle, bulletSpeed, bullet.body.velocity);
+            this.bulletTimer = this.time.now + bulletSpacing;
+          }
+        }
+      }
 
 
 
@@ -116,8 +156,7 @@ class SceneMain extends Phaser.Scene {
       group.createMultiple({key: 'sun', frameQuantity: 2});
       group.createMultiple({key: 'moon', frameQuantity: 2});
 
-      let rect = new Phaser.Geom.Rectangle(0, 0, 3600, 3600);
-      Phaser.Actions.RandomRectangle(group.getChildren(), rect);
+      Phaser.Actions.RandomRectangle(group.getChildren(), this.rect);
       group.children.iterate(function (child, index) {
         let sf = Math.max(0.3, Math.random());
         if (child.texture.key === 'bigStar') {
