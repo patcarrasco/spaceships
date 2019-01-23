@@ -51,7 +51,7 @@ class SceneMain extends Phaser.Scene {
       this.keySpace = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
 
       this.maxSpeed = 400
-      this.moveSpeed = 60
+      this.moveSpeed = 400
       this.player.angle = 0
       // this.player.body.maxVelocity.setTo(this.maxSpeed, this.maxSpeed);
 
@@ -111,15 +111,15 @@ class SceneMain extends Phaser.Scene {
     }
 
     createStarfield() {
-      let group = this.add.group({ key: 'smallStar', frameQuantity: 30});
-      group.createMultiple({ key: 'smallestStar', frameQuantity: 120 });
-      group.createMultiple({key: 'sun', frameQuantity: 2});
-      group.createMultiple({key: 'moon', frameQuantity: 2});
+      let group = this.add.group({ key: 'smallStar', frameQuantity: 10});
+      group.createMultiple({ key: 'smallestStar', frameQuantity: 400 });
+      group.createMultiple({key: 'sun', frameQuantity: 3});
+      group.createMultiple({key: 'moon', frameQuantity: 4});
 
       let rect = new Phaser.Geom.Rectangle(0, 0, 3600, 3600);
       Phaser.Actions.RandomRectangle(group.getChildren(), rect);
       group.children.iterate(function (child, index) {
-        let sf = Math.max(0.3, Math.random());
+        let sf = Math.max(0.3, .4);
         if (child.texture.key === 'bigStar') {
           sf = 0.2;
         }

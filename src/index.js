@@ -1,3 +1,5 @@
+// ActionCable = require('actioncable')
+
 const URL = 'http://localhost:3000/ships';
 const API_WEBSOCK_ROOT = 'ws://localhost:3000/cable';
 const HEADERS = {
@@ -31,17 +33,22 @@ document.addEventListener("DOMContentLoaded", () => {
       body: JSON.stringify(obj)
     })
     .then(res => res.json())
-    .then( (ship) => {
+    .then( () => {
       connect()
     })
     .catch((errors) => console.log("error: ", errors))
   }
 
   function connect() {
-        ws = new WebSocket(API_WEBSOCK_ROOT, []);
-        ws.onmessage = () => console.log('message recieved') // ping every 3 seconds
-        ws.onopen = () => console.log('handshake successful')
-        ws.onerror = () => console.log('ERROR!!')
+    let ws = new WebSocket(API_WEBSOCK_ROOT)
+    console.log(ws)
+    ws.onopen = () => {
+      ws.send('MatchChannel', {
+        method: "subscribed"
+        params: {
+          channel: ""
+        }
+      })
     }
-
+  }
 })

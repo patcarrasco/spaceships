@@ -16,9 +16,7 @@ let config = {
     }
   },
   scene: [
-    SceneMainMenu,
-    SceneMain,
-    SceneGameOver
+    SceneMain
   ]
 }
 
