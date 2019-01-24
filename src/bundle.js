@@ -640,14 +640,15 @@ document.addEventListener("DOMContentLoaded", () => {
       body: JSON.stringify(obj)
     })
     .then(res => res.json())
-    .then( (ship) => {
-      connect()
+    .then(ship => {
+      console.log(ship.data.id)
+      connect(ship.data.id)
     })
     .catch((errors) => console.log("error: ", errors))
   }
 
-  function connect() {
-    CABLE.subscriptions.create({channel: 'MatchChannel'}, {
+  const connect = function(id) {
+    CABLE.subscriptions.create({channel: 'MatchChannel', shipId: id}, {
       connected: function (data) {;
       },
       disconnected: function () {
@@ -658,11 +659,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // function connect() {
-  //   CABLE.subscriptions.create('MatchChannel', () => {
-  //     ship: 'ship'
-  //   })
-  // }
 
 
 
