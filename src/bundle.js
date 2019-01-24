@@ -612,8 +612,11 @@ const HEADERS = {
   Accept: 'application/json',
 };
 // start cable
-const CABLE = ActionCable.createConsumer(API_WEBSOCK_ROOT)
+CABLE = ActionCable.createConsumer(API_WEBSOCK_ROOT)
 
+
+let activePlayerId;
+let activePlayers = []
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -641,25 +644,33 @@ document.addEventListener("DOMContentLoaded", () => {
     })
     .then(res => res.json())
     .then(ship => {
-      console.log(ship.data.id)
-      connect(ship.data.id)
+      activePlayerId = ship.data.id
+      connect(activePlayerId)
+
+      // create player
+      // game.scene.scenes[0].createPlayer(ship.data.attributes)
     })
     .catch((errors) => console.log("error: ", errors))
   }
 
-  const connect = function(id) {
+  connect = function(id) {
     CABLE.subscriptions.create({channel: 'MatchChannel', shipId: id}, {
       connected: function (data) {;
+        console.log("successfully connected")
+        // game = new Phaser.Game(config) // create game object and pass the above configs
       },
       disconnected: function () {
       },
       received: function (data) {
-        console.log(data)
+        // console.log(data)
+        activePlayers = data.data
+        // console.log('in received')
+        // console.log(game.scene.scenes[0].renderPlayers)
+        game.scene.scenes[0].renderPlayers(activePlayers, activePlayerId)
+
       }
     });
   }
-
-
 
 
 

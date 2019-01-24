@@ -14,7 +14,7 @@ let config = {
 }
 
 let game = new Phaser.Game(config) // create game object and pass the above configs
-console.log(game)
+// console.log(game)
 // // create scene
 //
 // function preload() {
