@@ -29,7 +29,7 @@ class SceneMain extends Phaser.Scene {
     createPlayer(attributes) {
       const {id,x,y,name,color,health, angle} = attributes
       // create player
-      this.text = this.add.text(x, y-30, name)
+      this.text = this.add.text(x-30, y-30, name)
       this.player = this.physics.add.sprite(x, y, 'ship')
       this.player.id = id
       this.player.setScale(0.1)
@@ -132,13 +132,6 @@ class SceneMain extends Phaser.Scene {
 
 
 
-      //create walls
-      this.platforms = this.physics.add.staticGroup();
-      this.platforms.create(600, 400);
-
-
-
-
       // create bullets
       this.bullets = this.physics.add.group({
         defaultKey: 'bullet',
@@ -150,6 +143,11 @@ class SceneMain extends Phaser.Scene {
       this.cameras.main.setViewport(0, 0, 800, 600)
       this.cameras.main.setBounds(0, 0, 5000, 5000).setName('main');
 
+
+
+      //create score
+      this.scoreBox = this.add.text(this.cameras.main.scrollX, this.cameras.main.scrollY, "Scores")
+      this.score = this.add.text(this.cameras.main.scrollX, this.cameras.main.scrollY + 30, `Name: Points`)
 
       /*this.physics.add.overlap(this.player, this.bullets, () => {
         this.player.setVisible(false).setActive(false)
@@ -234,10 +232,10 @@ class SceneMain extends Phaser.Scene {
     }
 
     createStarfield() {
-      let group = this.add.group({ key: 'smallStar', frameQuantity: 10});
-      group.createMultiple({ key: 'smallestStar', frameQuantity: 400 });
-      group.createMultiple({key: 'sun', frameQuantity: 3});
-      group.createMultiple({key: 'moon', frameQuantity: 4});
+      let group = this.add.group({ key: 'smallStar', frameQuantity: 100});
+      group.createMultiple({ key: 'smallestStar', frameQuantity: 500 });
+      group.createMultiple({key: 'sun', frameQuantity: 10});
+      group.createMultiple({key: 'moon', frameQuantity: 13});
 
       Phaser.Actions.RandomRectangle(group.getChildren(), this.rect);
       group.children.iterate(function (child, index) {
@@ -250,8 +248,14 @@ class SceneMain extends Phaser.Scene {
     }
 
     move(object, distance) {
-	    object.x = object.x + distance * Math.cos(object.rotation);
-	    object.y = object.y + distance * Math.sin(object.rotation);
+      this.scoreBox.x = this.cameras.main.scrollX + 40
+      this.scoreBox.y = this.cameras.main.scrollY + 40
+      this.score.x = this.cameras.main.scrollX + 40
+      this.score.y = this.cameras.main.scrollY+ 70
+      object.x = object.x + distance * Math.cos(object.rotation);
+      object.y = object.y + distance * Math.sin(object.rotation);
+      this.text.x = object.x - 30
+      this.text.y = object.y - 30
       const {x, y, id, angle} = object
       CABLE.subscriptions.subscriptions[0].send({action: "move", data: {x, y, id, angle}})
     }
