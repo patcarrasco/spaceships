@@ -29,10 +29,12 @@ class SceneMain extends Phaser.Scene {
     createPlayer(attributes) {
       const {id,x,y,name,color,health, angle} = attributes
       // create player
+      this.text = this.add.text(x, y-30, name)
       this.player = this.physics.add.sprite(x, y, 'ship')
       this.player.id = id
       this.player.setScale(0.1)
       this.player.alive = true
+      this.player.name = name
       this.player.health = 1000
       this.player.fixedToCamera = true
       // make the camera follow the player
@@ -44,6 +46,7 @@ class SceneMain extends Phaser.Scene {
       // create a group for foreign players
       const {id,x,y,name,color,health, angle} = attributes
       const newPlayer = this.physics.add.sprite(x, y, 'duck')
+      newPlayer.name = name
       newPlayer.id = id
       newPlayer.angle = angle
       newPlayer.health = health
