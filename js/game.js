@@ -1,7 +1,8 @@
 let config = {
   type: Phaser.AUTO, // phaser auto decides how to render
-  width: 800, // width
-  height: 600, // height
+  width: 1000, // width
+  height: 800, // height
+  parent: "phase",
   physics: {
     default: 'arcade',
     arcade: {

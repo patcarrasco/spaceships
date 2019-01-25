@@ -656,7 +656,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // create player
       // game.scene.scenes[0].createPlayer(ship.data.attributes)
     })
-    .catch((errors) => console.log("error: ", errors))
+    .catch((errors) => {
+      $(".field").addClass("error")
+    })
   }
 
   connect = function(id) {

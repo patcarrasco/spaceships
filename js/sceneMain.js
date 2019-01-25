@@ -7,15 +7,17 @@ class SceneMain extends Phaser.Scene {
 
     preload(){
       // load spaceship
-      this.load.image('ship', 'assets/spaceship.svg')
+      this.load.image('ship', 'assets/ship.png')
       // load space
       this.load.image('smallStar', 'assets/smallstar.png');
       this.load.image('sun', 'assets/sun.png');
+      this.load.image('earth', 'assets/earth.png');
+      this.load.image('black_hole', 'assets/black_hole.png');
       this.load.image('smallestStar', 'assets/smallestStar.png');
       this.load.image('moon', 'assets/moons.png');
       this.load.image('shot', 'assets/shot.png')
-      this.load.image('duck', 'assets/duck.png')
-
+      this.load.image('baddie', 'assets/baddie.png')
+      'black_hole'.setSize
       // load bullets
       this.load.image('bullet', 'assets/bullet.png');
 
@@ -29,10 +31,10 @@ class SceneMain extends Phaser.Scene {
     createPlayer(attributes) {
       const {id,x,y,name,color,health, angle} = attributes
       // create player
-      this.text = this.add.text(x-30, y-30, name)
+      this.text = this.add.text(x-50, y-50, name, {font: 'normal 16px Arial'})
       this.player = this.physics.add.sprite(x, y, 'ship')
       this.player.id = id
-      this.player.setScale(0.1)
+      this.player.setScale(0.2)
       this.player.alive = true
       this.player.name = name
       this.player.health = 1000
@@ -45,12 +47,13 @@ class SceneMain extends Phaser.Scene {
     createBaddies(attributes) {
       // create a group for foreign players
       const {id,x,y,name,color,health, angle} = attributes
-      const newPlayer = this.physics.add.sprite(x, y, 'duck')
+      const newPlayer = this.physics.add.sprite(x, y, 'baddie')
       newPlayer.name = name
       newPlayer.id = id
       newPlayer.angle = angle
       newPlayer.health = health
       newPlayer.alive = true
+      newPlayer.setScale(0.25)
       // newPlayer.setScale(0.1)
 
       this.baddies.add(newPlayer)
@@ -135,12 +138,12 @@ class SceneMain extends Phaser.Scene {
       // create bullets
       this.bullets = this.physics.add.group({
         defaultKey: 'bullet',
-        maxSize:100
+        maxSize:10000
       })
       this.rect = new Phaser.Geom.Rectangle(0, 0, 5000, 5000);
 
 
-      this.cameras.main.setViewport(0, 0, 800, 600)
+      this.cameras.main.setViewport(0, 0, 1000, 800)
       this.cameras.main.setBounds(0, 0, 5000, 5000).setName('main');
 
 
@@ -232,10 +235,12 @@ class SceneMain extends Phaser.Scene {
     }
 
     createStarfield() {
-      let group = this.add.group({ key: 'smallStar', frameQuantity: 100});
-      group.createMultiple({ key: 'smallestStar', frameQuantity: 500 });
-      group.createMultiple({key: 'sun', frameQuantity: 10});
-      group.createMultiple({key: 'moon', frameQuantity: 13});
+      let group = this.add.group({ key: 'smallStar', frameQuantity: 200});
+      group.createMultiple({ key: 'smallestStar', frameQuantity: 600 });
+      group.createMultiple({key: 'sun', frameQuantity: 12});
+      group.createMultiple({key: 'moon', frameQuantity: 15});
+      group.createMultiple({key: 'earth', frameQuantity: 3});
+      group.createMultiple({key: 'black_hole', frameQuantity: 20});
 
       Phaser.Actions.RandomRectangle(group.getChildren(), this.rect);
       group.children.iterate(function (child, index) {
@@ -254,8 +259,8 @@ class SceneMain extends Phaser.Scene {
       this.score.y = this.cameras.main.scrollY+ 70
       object.x = object.x + distance * Math.cos(object.rotation);
       object.y = object.y + distance * Math.sin(object.rotation);
-      this.text.x = object.x - 30
-      this.text.y = object.y - 30
+      this.text.x = object.x - 50
+      this.text.y = object.y - 50
       const {x, y, id, angle} = object
       CABLE.subscriptions.subscriptions[0].send({action: "move", data: {x, y, id, angle}})
     }
