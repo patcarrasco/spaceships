@@ -667,14 +667,18 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("successfully connected")
         // game = new Phaser.Game(config) // create game object and pass the above configs
       },
-      disconnected: function () {
+      disconnected: function (e) {
+        CABLE.subscriptions.subscriptions[0].send({action: "disconnect", ship_data: "hello"})
       },
       received: function (data) {
-        // console.log(data)
-        activePlayers = data.data
-        // console.log('in received')
-        // console.log(game.scene.scenes[0].renderPlayers)
-        game.scene.scenes[0].renderPlayers(activePlayers, activePlayerId)
+        if(data["bullet_data"]) {
+          game.scene.scenes[0].renderShots(data["bullet_data"])
+        } else if(data["c_data"]) {
+          game.scene.scenes[0].movePlayers(data["c_data"])
+        } else {
+          activePlayers = data.data
+          game.scene.scenes[0].renderPlayers(activePlayers, activePlayerId)
+        }
 
       }
     });

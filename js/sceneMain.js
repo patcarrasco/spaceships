@@ -15,11 +15,11 @@ class SceneMain extends Phaser.Scene {
       this.load.image('black_hole', 'assets/black_hole.png');
       this.load.image('smallestStar', 'assets/smallestStar.png');
       this.load.image('moon', 'assets/moons.png');
-      this.load.image('shot', 'assets/shot.png')
       this.load.image('baddie', 'assets/baddie.png')
       'black_hole'.setSize
       // load bullets
       this.load.image('bullet', 'assets/bullet.png');
+      this.load.image('shot', 'assets/shot.png');
 
 
     }
@@ -31,7 +31,7 @@ class SceneMain extends Phaser.Scene {
     createPlayer(attributes) {
       const {id,x,y,name,color,health, angle} = attributes
       // create player
-      this.text = this.add.text(x-50, y-50, name, {font: 'normal 16px Arial'})
+      this.playerText = this.add.text(x-50, y-50, name, {font: 'normal 16px Arial'})
       this.player = this.physics.add.sprite(x, y, 'ship')
       this.player.id = id
       this.player.setScale(0.2)
@@ -48,6 +48,13 @@ class SceneMain extends Phaser.Scene {
       // create a group for foreign players
       const {id,x,y,name,color,health, angle} = attributes
       const newPlayer = this.physics.add.sprite(x, y, 'baddie')
+      const newText = this.add.text(x-50, y-50, name, {font: 'normal 16px Arial'})
+      const newBullets = this.physics.add.group({
+        defaultKey: 'shot',
+        maxSize:10000
+      })
+      newBullets.id = id
+      newText.id = id
       newPlayer.name = name
       newPlayer.id = id
       newPlayer.angle = angle
@@ -57,16 +64,16 @@ class SceneMain extends Phaser.Scene {
       // newPlayer.setScale(0.1)
 
       this.baddies.add(newPlayer)
+      this.baddieTextGroup.add(newText)
+      this.baddieBulletSet[id] = newBullets
     }
 
     addPlayers(players, activePlayerId) {
-      console.log(players)
       players.forEach(player => {
         if (parseInt(player.id) === parseInt(activePlayerId)) {
           this.createPlayer(player.attributes)
         } else {
           this.createBaddies(player.attributes)
-          console.log("created baddies")
 
           // if (players.length > 1) baddies.getChildren().forEach( (ship)=> {
         //   //   if (parseInt(player.id) === parseInt(ship.id)) {
@@ -81,7 +88,6 @@ class SceneMain extends Phaser.Scene {
     }
 
     updatePlayers(players, activePlayerId) {
-      console.log('in update')
       let baddiesSet = this.baddies.children
       players.forEach(player => {
         if (parseInt(player.id) !== parseInt(activePlayerId)) {
@@ -95,6 +101,10 @@ class SceneMain extends Phaser.Scene {
               baddie.x = player.attributes.x
               baddie.y = player.attributes.y
               baddie.angle = player.attributes.angle
+              let baddieText = this.baddieTextGroup.children
+              let text = baddieText.entries.find(text => parseInt(text.id) === parseInt(player.id))
+              text.x = baddie.x - 50
+              text.y = baddie.y - 50
             } else {
               this.createBaddies(player.attributes)
             }
@@ -103,11 +113,13 @@ class SceneMain extends Phaser.Scene {
       })
       if (players.length <= baddiesSet.size) {
         baddiesSet.entries.forEach(baddie => {
-          console.log(baddie)
           let player = players.find(player => parseInt(player.id) === parseInt(baddie.id))
           if (!player) {
-            console.log('destroying', baddie.id)
-            baddie.destroy()
+            this.baddies.remove(baddie, true, true)
+            let baddieText = this.baddieTextGroup.children
+            let text = baddieText.entries.find(text => parseInt(text.id) === parseInt(baddie.id))
+            this.baddieTextGroup.remove(text, true, true)
+
           }
         })
       }
@@ -115,9 +127,7 @@ class SceneMain extends Phaser.Scene {
 
     renderPlayers(players, activePlayerId) {
       // checking if current player exists
-      console.log('inrender')
       if (this.player === undefined) {
-        console.log('adding')
         this.addPlayers(players, activePlayerId)
       } else {
         // render updates of current players
@@ -128,10 +138,45 @@ class SceneMain extends Phaser.Scene {
 
     }
 
+    renderShots(data) {
+      const {x, y, id, angle} = data
+      let ammo = this.baddieBulletSet[id]
+      if(ammo) {
+        let bullet = ammo.get()
+        console.log(bullet)
+        if(bullet) {
+          bullet.x = x
+          bullet.y = y
+          bullet.setActive(true);
+          bullet.setVisible(true);
+          bullet.angle = angle;
+          this.physics.velocityFromAngle(bullet.angle, 1000, bullet.body.velocity);
+        }
+      }
+    }
+
+    movePlayers(data) {
+      const {x, y, id, angle} = data
+      let baddiesSet = this.baddies.children
+      let baddie = baddiesSet.entries.find(baddie => parseInt(baddie.id) === parseInt(data.id))
+        if(baddie) {
+          baddie.x = x
+          baddie.y = y
+          baddie.angle = angle
+        }
+      let baddieText = this.baddieTextGroup.children
+      let text = baddieText.entries.find(text => parseInt(text.id) === parseInt(data.id))
+      if(text) {
+        text.x = x - 50
+        text.y = y - 50
+      }
+    }
 
     create(){
       // create enemies
       this.baddies = this.physics.add.group()
+      this.baddieTextGroup = this.physics.add.group()
+      this.baddieBulletSet = new Set()
 
 
 
@@ -214,7 +259,7 @@ class SceneMain extends Phaser.Scene {
         if(this.keySpace.isDown) {
           if (this.time.now > this.bulletTimer) {
             let bulletSpeed = 1000
-            let bulletSpacing = 250
+            let bulletSpacing = 100
             let bullet = this.bullets.get()
             if(bullet) {
               bullet.x = this.player.x
@@ -224,6 +269,7 @@ class SceneMain extends Phaser.Scene {
               bullet.angle = this.player.angle;
               this.physics.velocityFromAngle(bullet.angle, bulletSpeed, bullet.body.velocity);
               this.bulletTimer = this.time.now + bulletSpacing;
+              this.sendBullet(bullet, this.player.id)
             }
           }
         }
@@ -232,6 +278,10 @@ class SceneMain extends Phaser.Scene {
 
 
 
+    }
+
+    sendBullet({x, y, angle}, id) {
+      CABLE.subscriptions.subscriptions[0].send({action: "shoot", bullet_data: {x, y, id, angle}})
     }
 
     createStarfield() {
@@ -259,10 +309,10 @@ class SceneMain extends Phaser.Scene {
       this.score.y = this.cameras.main.scrollY+ 70
       object.x = object.x + distance * Math.cos(object.rotation);
       object.y = object.y + distance * Math.sin(object.rotation);
-      this.text.x = object.x - 50
-      this.text.y = object.y - 50
+      this.playerText.x = object.x - 50
+      this.playerText.y = object.y - 50
       const {x, y, id, angle} = object
-      CABLE.subscriptions.subscriptions[0].send({action: "move", data: {x, y, id, angle}})
+      CABLE.subscriptions.subscriptions[0].send({action: "move", c_data: {x, y, id, angle}})
     }
 
 }
