@@ -620,20 +620,25 @@ let activePlayers = []
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  const shipForm = document.getElementById('new-ship-form')
-  shipForm.addEventListener('submit', createShip)
+  const play = document.getElementById('submit')
+
+  play.addEventListener('click', createShip)
+
+  function hideModal() {
+    $('.tiny.modal')
+      .modal('hide')
+    ;
+  }
 
 
   function createShip(e) {
     let name = document.getElementById('input-name')
-    let color = document.getElementById('input-color')
     let email = document.getElementById('input-email')
 
     e.preventDefault()
 
     let obj = {ship : {
       name: name.value,
-      color: color.value,
       email: email.value
     }}
 
@@ -646,6 +651,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(ship => {
       activePlayerId = ship.data.id
       connect(activePlayerId)
+      hideModal()
 
       // create player
       // game.scene.scenes[0].createPlayer(ship.data.attributes)

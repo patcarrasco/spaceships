@@ -9,14 +9,19 @@ const HEADERS = {
 
 
 document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById('mod')
+  const play = document.getElementById('submit')
 
-  const shipForm = document.getElementById('new-ship-form')
-  shipForm.addEventListener('submit', createShip)
+  play.addEventListener('click', toggleModal)
 
+  function toggleModal() {
+    $('.tiny.modal')
+      .modal('hide')
+    ;
+  }
 
   function createShip(e) {
     let name = document.getElementById('input-name')
-    let color = document.getElementById('input-color')
     let email = document.getElementById('input-email')
 
     e.preventDefault()
