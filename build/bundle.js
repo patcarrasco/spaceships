@@ -621,8 +621,22 @@ let activePlayers = []
 document.addEventListener("DOMContentLoaded", () => {
 
   const play = document.getElementById('submit')
+  const name = document.getElementById('input-name')
+  const email = document.getElementById('input-email')
+  const errDiv = document.getElementById('err-message')
+
+
+  name.addEventListener('change', onChange)
+  email.addEventListener('change', onChange)
 
   play.addEventListener('click', createShip)
+
+  function onChange(e) {
+    while (errDiv.hasChildNodes()) {
+      errDiv.removeChild(errDiv.firstChild)
+    }
+    errDiv.className = "ui error message "
+  }
 
   function hideModal() {
     $('.tiny.modal')
@@ -630,13 +644,47 @@ document.addEventListener("DOMContentLoaded", () => {
     ;
   }
 
+  function validate(name, email) {
+    const nameReg = new RegExp("[a-z0-9]{2,8}", "i")
+    const emailReg = new RegExp("^.+@[^\.].*\.[a-z]{2,}$", "i")
+    
+    let check = {status: true, message: []}
 
-  function createShip(e) {
-    let name = document.getElementById('input-name')
-    let email = document.getElementById('input-email')
+    if(!nameReg.test(name)) {
+      check.status = false
+      check.message = [...check.message, "Name is invalid. Must be 2-8 alphanumeric characters."]
+    }
+
+    if (!emailReg.test(email)) {
+      check.status = false
+      check.message = [...check.message, "Email must be a valid email"]
+    }
+
+    return check
+  }
+
+  function createShip (e) {
 
     e.preventDefault()
 
+    const check = validate(name.value, email.value)
+
+    if (!check.status && !errDiv.hasChildNodes()) {
+      let ul = document.createElement('ul')
+      ul.className = "list"
+      for (let i = 0; i < check.message.length; i++) {
+        let li = document.createElement('li')
+        li.innerText = check.message[i]
+        ul.append(li)
+      }
+
+      errDiv.append(ul)
+      errDiv.className += " visible"
+    
+      return false
+    }
+    
+   
     let obj = {ship : {
       name: name.value,
       email: email.value

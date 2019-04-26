@@ -91,7 +91,7 @@ class SceneMain extends Phaser.Scene {
       shot.destroy()
       player.setTint(0xff0000)
       setTimeout(() => player.setTint(0xffffff), 100)
-      player.health -= 100
+      player.health -= 10
 
       if (player.health < 0 && this.player === player) {
 
@@ -100,22 +100,33 @@ class SceneMain extends Phaser.Scene {
         this.explode(player.x, player.y)
         // e.setBlendMode(Phaser.BlendModes.ADD)
         player.alive = false
-        player.destroy()
+        // player.destroy()
+
+        this.gameOver()
       } else if (player.health < 0) {
         this.explode(player.x, player.y)
         this.player.kills += 1
         this.score._text = `Kills: ${this.player.kills}`
         
         // delete player && name from game
-        player.destroy()
+        // player.destroy()
         let text = this.baddieTextGroup.children.entries.find(text => parseInt(text.id) === parseInt(player.id))
         this.baddieTextGroup.remove(text, true, true)
 
         if (this.baddies.children.size === 0) {
-          console.log('You Win!!!')
+          this.champion()
         }
       }
 
+    }
+
+
+    gameOver() {
+      this.add.text(this.cameras.main.scrollX + 400, this.cameras.main.scrollY + 100, 'GAME OVER', { fontSize: '32px', fill: '#fff'})
+    }
+
+    champion() {
+      this.add.text(this.cameras.main.scrollX + 400, this.cameras.main.scrollY + 100, 'Champion!', { fontSize: '32px', fill: '#fff'})
     }
    
     addPlayers(players, activePlayerId) {
@@ -258,7 +269,7 @@ class SceneMain extends Phaser.Scene {
         // gravityY: 200,
         lifespan: { min: 1000, max: 10000 },
         blendMode: 'ADD',
-        quantity:20,
+        quantity:10,
         on: false
       })
 

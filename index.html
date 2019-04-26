@@ -9,23 +9,24 @@
     <script src="js/sceneMain.js"></script>
     <script src="js/game.js"></script>
     <script src="build/bundle.js"></script>
-    <script src="src/index.js"></script>
+    <!-- <script src="src/index.js"></script> -->
 </head>
 <body>
 	<div id="phase" class="ui one column grid center aligned">
 		<div id="mod" class="ui inverted segment tiny modal transition visible center aligned" style="position: fixed; top: 20%;">
 		    <h1 class="">
-		      Welcome to SpaceShips.io
+		      Welcome to Spaceships
 		    </h1>
 		    <div class="ui content">
 		      <div class="ui form">
-		        <div class="ui header">Create a new ship or join the game with your email</div>
+		        <div class="ui header">Create a new ship and join the game with your email</div>
 		        <div class="field">
 		        	<input class="ui input focus" id="input-name" type="text"  placeholder="Name">
 		        </div>
 		        <div class="field">
 			    	<input class="ui input focus" id="input-email"type="text"  placeholder="Email">
-		        </div>
+						</div>
+						<div id="err-message" class="ui error message"></div>
 		      </div>
 		    </div>
 		    <div class="actions">

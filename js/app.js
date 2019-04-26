@@ -26,6 +26,21 @@ document.addEventListener("DOMContentLoaded", () => {
     ;
   }
 
+  function validate(name, email) {
+    const nameReg = new RegExp(/^[a-z]\w+$/, i) 
+    const emailReg = new RegExp(/^.+@[^\.].*\.[a-z]{2,}$/, i)
+    
+    if(!nameReg(name)) {
+      return false
+    }
+
+    if (!emailReg(email)) {
+      return false
+    }
+
+    return true
+  }
+
 
   function createShip(e) {
     let name = document.getElementById('input-name')
@@ -33,28 +48,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     e.preventDefault()
 
+
+    validate(name, email)
+    console.log(validate(name, email))
+
     let obj = {ship : {
       name: name.value,
       email: email.value
     }}
 
-    fetch(URL, {
-      method: 'POST',
-      headers: HEADERS,
-      body: JSON.stringify(obj)
-    })
-    .then(res => res.json())
-    .then(ship => {
-      activePlayerId = ship.data.id
-      connect(activePlayerId)
-      hideModal()
+    // fetch(URL, {
+    //   method: 'POST',
+    //   headers: HEADERS,
+    //   body: JSON.stringify(obj)
+    // })
+    // .then(res => res.json())
+    // .then(ship => {
+    //   activePlayerId = ship.data.id
+    //   connect(activePlayerId)
+    //   hideModal()
 
-      // create player
-      // game.scene.scenes[0].createPlayer(ship.data.attributes)
-    })
-    .catch((errors) => {
-      $(".field").addClass("error")
-    })
+    //   // create player
+    //   game.scene.scenes[0].createPlayer(ship.data.attributes)
+    // })
+    // .catch((errors) => {
+    //   $(".field").addClass("error")
+    // })
   }
 
   connect = function(id) {
@@ -79,3 +98,5 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+
+})
