@@ -93,23 +93,24 @@ class SceneMain extends Phaser.Scene {
       setTimeout(() => player.setTint(0xffffff), 100)
       player.health -= 10
 
-      if (player.health < 0 && this.player === player) {
+      if (player.health < 0 && this.player === player && this.player.alive) {
 
-        // console.log(this.emitter)
         
         this.explode(player.x, player.y)
-        // e.setBlendMode(Phaser.BlendModes.ADD)
-        player.alive = false
-        // player.destroy()
 
+        this.player.alive = false
         this.gameOver()
+
+        this.player.setTint(0x2E2E2E)
+
       } else if (player.health < 0) {
         this.explode(player.x, player.y)
         this.player.kills += 1
         this.score._text = `Kills: ${this.player.kills}`
         
         // delete player && name from game
-        // player.destroy()
+        player.destroy()
+
         let text = this.baddieTextGroup.children.entries.find(text => parseInt(text.id) === parseInt(player.id))
         this.baddieTextGroup.remove(text, true, true)
 
@@ -122,7 +123,7 @@ class SceneMain extends Phaser.Scene {
 
 
     gameOver() {
-      this.add.text(this.cameras.main.scrollX + 400, this.cameras.main.scrollY + 100, 'GAME OVER', { fontSize: '32px', fill: '#fff'})
+      this.add.text(this.cameras.main.scrollX + 400, this.cameras.main.scrollY + 10, 'GAME OVER', { fontSize: '32px', fill: '#fff'})
     }
 
     champion() {
@@ -338,7 +339,7 @@ class SceneMain extends Phaser.Scene {
           this.player.angle += 0
         }
 
-        if(this.keySpace.isDown) {
+        if(this.keySpace.isDown && this.player.alive) {
           if (this.time.now > this.bulletTimer) {
             let bulletSpeed = 1000
             let bulletSpacing = 100
