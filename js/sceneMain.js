@@ -2,9 +2,14 @@ class SceneMain extends Phaser.Scene {
     constructor() {
       super({key: "SceneMain"})
       this.bulletTimer = 0
+      this.userLoc = {}
+      this.gameStart = false
+
+      this.bulletCollision = this.bulletCollision.bind(this)
+      this.explode = this.explode.bind(this)
     }
 
-
+    // -------------------- Loading Assets
     preload(){
       // load spaceship
       this.load.image('ship', 'assets/ship.png')
@@ -20,6 +25,11 @@ class SceneMain extends Phaser.Scene {
       // load bullets
       this.load.image('bullet', 'assets/bullet.png');
       this.load.image('shot', 'assets/shot.png');
+      
+      // load explosions...
+      this.load.image('explode', 'assets/explode.png');
+      this.load.image('smoke', 'assets/smoke.png')
+      this.load.image('blue', 'assets/blue.webp')
 
 
     }
@@ -32,25 +42,32 @@ class SceneMain extends Phaser.Scene {
       const {id,x,y,name,color,health, angle} = attributes
       // create player
       this.playerText = this.add.text(x-50, y-50, name, {font: 'normal 16px Arial'})
-      this.player = this.physics.add.sprite(x, y, 'ship')
+      this.player = this.physics.add.image(x, y, 'ship')
       this.player.id = id
       this.player.setScale(0.2)
       this.player.alive = true
       this.player.name = name
       this.player.health = 1000
       this.player.fixedToCamera = true
+      this.player.kills = 0
       // make the camera follow the player
       this.cameras.main.startFollow(this.player);
       this.player.angle = angle
+      
+      // define start of game
+      this.gameStart= true
+
+      // collisions
+   
     }
 
     createBaddies(attributes) {
       // create a group for foreign players
       const {id,x,y,name,color,health, angle} = attributes
-      const newPlayer = this.physics.add.sprite(x, y, 'baddie')
+      const newPlayer = this.physics.add.image(x, y, 'ship')
       const newText = this.add.text(x-50, y-50, name, {font: 'normal 16px Arial'})
       const newBullets = this.physics.add.group({
-        defaultKey: 'shot',
+        defaultKey: 'bullet',
         maxSize:10000
       })
       newBullets.id = id
@@ -60,29 +77,53 @@ class SceneMain extends Phaser.Scene {
       newPlayer.angle = angle
       newPlayer.health = health
       newPlayer.alive = true
-      newPlayer.setScale(0.25)
-      // newPlayer.setScale(0.1)
+      newPlayer.setScale(0.2)
 
       this.baddies.add(newPlayer)
       this.baddieTextGroup.add(newText)
       this.baddieBulletSet[id] = newBullets
+
+      // collision between ENEMY bullets and USER
+      this.physics.add.overlap(this.player, newBullets, this.bulletCollision)
     }
 
+    bulletCollision(player, shot) {
+      shot.destroy()
+      player.setTint(0xff0000)
+      setTimeout(() => player.setTint(0xffffff), 100)
+      player.health -= 100
+
+      if (player.health < 0 && this.player === player) {
+
+        // console.log(this.emitter)
+        
+        this.explode(player.x, player.y)
+        // e.setBlendMode(Phaser.BlendModes.ADD)
+        player.alive = false
+        player.destroy()
+      } else if (player.health < 0) {
+        this.explode(player.x, player.y)
+        this.player.kills += 1
+        this.score._text = `Kills: ${this.player.kills}`
+        
+        // delete player && name from game
+        player.destroy()
+        let text = this.baddieTextGroup.children.entries.find(text => parseInt(text.id) === parseInt(player.id))
+        this.baddieTextGroup.remove(text, true, true)
+
+        if (this.baddies.children.size === 0) {
+          console.log('You Win!!!')
+        }
+      }
+
+    }
+   
     addPlayers(players, activePlayerId) {
       players.forEach(player => {
         if (parseInt(player.id) === parseInt(activePlayerId)) {
           this.createPlayer(player.attributes)
         } else {
           this.createBaddies(player.attributes)
-
-          // if (players.length > 1) baddies.getChildren().forEach( (ship)=> {
-        //   //   if (parseInt(player.id) === parseInt(ship.id)) {
-        //   //     ship.();
-        //   //   } else {
-        //   //     this.createOtherPlayer(player.attributes)
-        //   //   }
-        //   // })
-        // }
       }
     })
     }
@@ -126,16 +167,12 @@ class SceneMain extends Phaser.Scene {
     }
 
     renderPlayers(players, activePlayerId) {
-      // checking if current player exists
       if (this.player === undefined) {
         this.addPlayers(players, activePlayerId)
       } else {
         // render updates of current players
         this.updatePlayers(players, activePlayerId)
       }
-
-
-
     }
 
     renderShots(data) {
@@ -143,14 +180,18 @@ class SceneMain extends Phaser.Scene {
       let ammo = this.baddieBulletSet[id]
       if(ammo) {
         let bullet = ammo.get()
-        console.log(bullet)
         if(bullet) {
+          const bulletSpeed = 2000
+          const bulletSpacing = 100
+
           bullet.x = x
           bullet.y = y
           bullet.setActive(true);
           bullet.setVisible(true);
           bullet.angle = angle;
-          this.physics.velocityFromAngle(bullet.angle, 1000, bullet.body.velocity);
+
+          this.bulletTimer = this.time.now + bulletSpacing;
+          this.physics.velocityFromAngle(bullet.angle, bulletSpeed, bullet.body.velocity);
         }
       }
     }
@@ -172,43 +213,74 @@ class SceneMain extends Phaser.Scene {
       }
     }
 
+    
+    explode(x, y) {
+      // this.emitterRing.emitParticleAt(x, y)
+      // this.emitterExplode.emitParticleAt(x, y)
+      this.emitterBlue.emitParticleAt(x, y)
+    }
+
+
     create(){
       // create enemies
       this.baddies = this.physics.add.group()
       this.baddieTextGroup = this.physics.add.group()
       this.baddieBulletSet = new Set()
-
-
-
+    
       // create bullets
       this.bullets = this.physics.add.group({
         defaultKey: 'bullet',
         maxSize:10000
       })
+
+      // // create explosion animations
+      // this.emitterRing = this.add.particles('bullet').createEmitter({
+      //   angle: { min: 0, max: 360, steps: 32 },
+      //   lifespan: 1000,
+      //   speed: 400,
+      //   quantity: 32,
+      //   scale: { start: 0.3, end: 0 },
+      //   on: false
+      // })
+
+      // this.emitterExplode = this.add.particles('explode').createEmitter({
+      //   lifespan: 200,
+      //   scale: { start: 2, end: 0 },
+      //   rotate: { start: 0, end: 180 },
+      //   quantity: 1,
+
+      //   on: false
+      // });
+
+      this.emitterBlue = this.add.particles('blue').createEmitter({
+        angle: { min: 0, max: 360 },
+        speed: 100,
+        // gravityY: 200,
+        lifespan: { min: 1000, max: 10000 },
+        blendMode: 'ADD',
+        quantity:20,
+        on: false
+      })
+
+      // collision between USER bullets and Baddies
+      this.physics.add.overlap(this.baddies, this.bullets, this.bulletCollision)
+
       this.rect = new Phaser.Geom.Rectangle(0, 0, 5000, 5000);
 
 
-      this.cameras.main.setViewport(0, 0, 1000, 800)
+      this.cameras.main.setViewport(0, 0, window.innerWidth, window.innerHeight)
       this.cameras.main.setBounds(0, 0, 5000, 5000).setName('main');
 
-
-
-      //create score
-      this.scoreBox = this.add.text(this.cameras.main.scrollX, this.cameras.main.scrollY, "Scores")
-      this.score = this.add.text(this.cameras.main.scrollX, this.cameras.main.scrollY + 30, `Name: Points`)
-
+      //create screen texts
+      this.scoreBox = this.add.text(this.cameras.main.scrollX +10, this.cameras.main.scrollY +30, "Stats")
+      this.score = this.add.text(this.cameras.main.scrollX +10, this.cameras.main.scrollY + 60, `Kills: `)
+      this.health = this.add.text(this.cameras.main.scrollX +10, this.cameras.main.scrollY + 90, `Health: `)
+      this.playerNumbers = this.add.text(this.cameras.main.scrollX + 10, this.cameras.main.scrollY + 120, `Players in Game: `)
       /*this.physics.add.overlap(this.player, this.bullets, () => {
         this.player.setVisible(false).setActive(false)
         this.bullets.clear(true)
       })*/
 
-
-      // // // ship movement with keys
-      // this.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W)
-      // this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A)
-      // this.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S)
-      // this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
-      //
       this.keyUp = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP)
       this.keyDown = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN)
       this.keyLeft = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT)
@@ -220,7 +292,8 @@ class SceneMain extends Phaser.Scene {
 
       this.maxSpeed = 400
       this.moveSpeed = 400
-      // this.player.body.maxVelocity.setTo(this.maxSpeed, this.maxSpeed);
+
+      // this.defineCollisions()
 
       this.createStarfield()
 
@@ -229,9 +302,7 @@ class SceneMain extends Phaser.Scene {
     update(){
 
       if (this.player) {
-
-        // // ship mvmnt with thrust
-        // WSAD
+      
         if (this.keyUp.isDown) {
           // this.player.body.acceleration.y = -this.moveSpeed
           this.move(this.player,10)
@@ -251,7 +322,7 @@ class SceneMain extends Phaser.Scene {
         else if (this.keyRight.isDown) {
           this.player.angle += 8
           this.move(this.player, 0)
-        }
+        }   
         else {
           this.player.angle += 0
         }
@@ -265,7 +336,7 @@ class SceneMain extends Phaser.Scene {
               bullet.x = this.player.x
               bullet.y = this.player.y
               bullet.setActive(true);
-              bullet.setVisible(true);
+              bullet.setVisible(true);    
               bullet.angle = this.player.angle;
               this.physics.velocityFromAngle(bullet.angle, bulletSpeed, bullet.body.velocity);
               this.bulletTimer = this.time.now + bulletSpacing;
@@ -273,11 +344,25 @@ class SceneMain extends Phaser.Scene {
             }
           }
         }
-      } // end if this.player
 
+        this.health._text = `Health: ${this.player.health}`
+        this.health.updateText()
+        this.score.updateText()
 
+        this.playerNumbers._text = `Players in Game: ${this.baddies.children.size}`
+        this.playerNumbers.updateText()
 
+        const {x, y, angle, id} = this.player
 
+        this.userLoc = {x, y, angle, id}
+        
+      } 
+
+      
+    }
+
+    sendLocation({x, y, angle, id}) {
+      CABLE.subscriptions.subscriptions[0].send({action: "disconnect", c_data: {x, y, id, angle}})
     }
 
     sendBullet({x, y, angle}, id) {
@@ -303,10 +388,14 @@ class SceneMain extends Phaser.Scene {
     }
 
     move(object, distance) {
-      this.scoreBox.x = this.cameras.main.scrollX + 40
-      this.scoreBox.y = this.cameras.main.scrollY + 40
-      this.score.x = this.cameras.main.scrollX + 40
-      this.score.y = this.cameras.main.scrollY+ 70
+      this.scoreBox.x = this.cameras.main.scrollX + 10
+      this.scoreBox.y = this.cameras.main.scrollY +30
+      this.score.x = this.cameras.main.scrollX + 10
+      this.score.y = this.cameras.main.scrollY + 60
+      this.health.x = this.cameras.main.scrollX + 10
+      this.health.y = this.cameras.main.scrollY + 90
+      this.playerNumbers.x = this.cameras.main.scrollX + 10
+      this.playerNumbers.y = this.cameras.main.scrollY+ 120
       object.x = object.x + distance * Math.cos(object.rotation);
       object.y = object.y + distance * Math.sin(object.rotation);
       this.playerText.x = object.x - 50

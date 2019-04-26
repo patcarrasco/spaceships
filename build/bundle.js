@@ -654,7 +654,7 @@ document.addEventListener("DOMContentLoaded", () => {
       hideModal()
 
       // create player
-      // game.scene.scenes[0].createPlayer(ship.data.attributes)
+      game.scene.scenes[0].createPlayer(ship.data.attributes)
     })
     .catch((errors) => {
       $(".field").addClass("error")
